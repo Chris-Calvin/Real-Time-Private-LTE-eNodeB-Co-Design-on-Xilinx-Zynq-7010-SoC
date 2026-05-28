@@ -29,7 +29,7 @@ A System-on-Chip (SoC) integrates a processor, programmable logic, memory, and p
 
 ### 2.1 Vivado IP Integrator Block Design
 
-![Vivado Block Design](images/fig1_vivado_block_design.jpg)  
+![Vivado Block Design](images/FIG1_V~1.JPG)  
 *Fig. 1 — Complete Vivado IP Integrator block design for the Zynq-7010 PL. Shows the full AD9361 digital interface, AXI interconnect hierarchy (Processor → AXI CPU Interconnect → DMA/Memory/Peripherals), TX/RX FIR filter chains, AXI Quad SPI, AXI IIC, and ZYNQ7 Processing System blocks. Five functional zones are visible: external I/O ports, AD9361 front-end and FIR chain, ZYNQ7 PS and AXI crossbar, ADI AXI DMA controllers, and SPI/IIC control path.*
 
 The block design is organized into five functional zones:
@@ -103,24 +103,24 @@ The software stack has three layers:
 
 ### 4.2 USB/IP Device Forwarding
 
-![usbipd Attachment](images/fig3_usbipd_attachment.jpg)  
+![usbipd Attachment](images/FIG3_U~1.JPG)  
 *Fig. 3 — Windows PowerShell (Administrator) executing `usbipd detach --busid 2-5` then `usbipd attach --wsl --busid 2-5` to forward the ADALM-PLUTO SDR directly to the WSL2 Ubuntu distribution. This step is mandatory at every session before running srsRAN — the USB device is not automatically re-forwarded across WSL2 restarts.*
 
 ### 4.3 eNodeB Configuration
 
 **enb.conf [enb] section:**
 
-![enb.conf ENB Section](images/fig4_enb_conf_enb_section.jpg)  
+![enb.conf ENB Section](images/FIG4_E~1.JPG)  
 *Fig. 4 — nano editor showing enb.conf [enb] section with enb_id=0x19B, mcc=001, mnc=01, mme_addr=127.0.1.100, gtp_bind_addr=127.0.1.1, n_prb=50. Note: this is the pre-correction configuration — the PLMN mismatch bug was still present at this stage.*
 
 **enb.conf [rf] section:**
 
-![enb.conf RF Section](images/fig5_enb_conf_rf_section.jpg)  
+![enb.conf RF Section](images/FIG5_E~1.JPG)  
 *Fig. 5 — nano editor showing enb.conf [rf] section with dl_earfcn=3350 (pre-Band 3 correction), tx_gain=80, rx_gain=40, device_name=soapy, device_args=driver=pluto,uri=usb:1.4. Final corrected config uses dl_earfcn=1600 (Band 3, 1845 MHz).*
 
 ### 4.4 SoapySDR Initialization
 
-![srsenb SoapySDR Init](images/fig6_srsenb_soapysdr_init.jpg)  
+![srsenb SoapySDR Init](images/FIG6_S~1.JPG)  
 *Fig. 6 — srsenb boot log showing the full SoapySDR initialization sequence: libsrsran_rf_soapy.so loaded; PlutoSDR enumerated at USB address usb:1.5.5; single-channel SISO mode; CF32 sample format; RX buffer auto-set to 524288 bytes; TX buffer auto-set to 32768 bytes; XADC and AD9361 temperature/voltage sensors enumerated; eNodeB started successfully.*
 
 ---
@@ -129,7 +129,7 @@ The software stack has three layers:
 
 ### 5.1 Debug: S1-AP PLMN Mismatch (Challenge 1)
 
-![srsepc PLMN Mismatch Bug](images/fig2_srsepc_plmn_mismatch_bug.jpg)  
+![srsepc PLMN Mismatch Bug](images/FIG2_S~1.JPG)  
 *Fig. 2 — srsepc first boot log showing the PLMN mismatch bug. The MME initializes with MCC:0xf001, MNC:0xff01 (stale compiled test values) rather than the configured MCC:001, MNC:01. The eNodeB S1_SETUP_REQUEST is accepted (S1 Setup Response sent) then immediately followed by SCTP Association Shutdown — repeating infinitely. Diagnosed via tcpdump on the loopback interface.*
 
 **Root cause:** A stale compiled srsRAN binary encoded the S1AP PLMN field with an internal test value (0xf001/0xff01) rather than the user-configured MCC/MNC.
@@ -138,22 +138,22 @@ The software stack has three layers:
 
 ### 5.2 eNodeB Operational State
 
-![srsenb Operational State](images/fig7_srsenb_operational_state.jpg)  
+![srsenb Operational State](images/FIG7_S~1.JPG)  
 *Fig. 7 — srsenb log after full initialization. Confirmed: Rx PGA 71 dB, Tx PGA 79 dB, Rx antenna A_BALANCED, Tx antenna A. DL=1845.0 MHz / UL=1750.0 MHz (Band 3, EARFCN 1600), nof_prb=25 (5 MHz). The AD9361 sensors enumerated: xadc_temp0, xadc_voltages 0–8, adm1177_current0, adm1177_voltage0, ad9361-phy_temp0, ad9361-phy_voltage2.*
 
 ### 5.3 MAC-Layer Trace Mode
 
-![srsenb Trace Mode](images/fig8_srsenb_trace_mode.jpg)  
+![srsenb Trace Mode](images/FIG8_S~1.JPG)  
 *Fig. 8 — srsenb trace mode output. "==== eNodeB started ===" confirms the PHY layer is transmitting a live LTE carrier on Band 3 at DL=2680.0 MHz / UL=2560.0 MHz with nof_prb=50. The trace mode entry confirms the MAC-layer scheduler is actively processing subframes — this is the live carrier confirmation preceding the Band 3 frequency correction.*
 
 ### 5.4 S1-AP Protocol Validation — Corrected PLMN 901-70
 
-![srsepc Corrected PLMN 901-70](images/fig9_srsepc_plmn_901_70_corrected.jpg)  
+![srsepc Corrected PLMN 901-70](images/FIG9_S~1.JPG)  
 *Fig. 9 — srsepc EPC log after PLMN correction to 901-70. MME correctly initializes with MCC:0xf901, MNC:0xff70 (BCD encoding of 901-70). The MME correctly decodes MCC:901, MNC:70 from every S1AP S1_SETUP_REQUEST and responds with S1 Setup Response (Associations 28, 30, 32...). B-PLMN 0x9f107 confirms correct BCD encoding. The repeating SCTP Association Shutdown cycling is a WSL2 Hyper-V virtualization artifact — not a protocol failure.*
 
 ### 5.5 Physical Deployment — UE PLMN Detection
 
-![Physical Deployment](images/fig10_physical_deployment.jpg)  
+![Physical Deployment](images/FIG10_~1.JPG)  
 *Fig. 10 — Complete physical deployment. The ADALM-PLUTO SDR (blue LED active, indicating USB enumeration) connected via USB 2.0 to the host laptop running Windows 11 / WSL2 Ubuntu. Split-screen shows srsepc EPC log (left terminal) and srsenb eNodeB log (right terminal) with DL=1845.0 MHz confirmed. Dual SMA stub antennas handle TX (1845 MHz) and RX (1750 MHz). A commercial Android UE successfully detected PLMN 901-70 in a manual network scan — confirming full PHY downlink chain functionality.*
 
 **UE PLMN detection** (Settings > Network > Choose network identifying PLMN 901-70) confirms:
@@ -232,16 +232,16 @@ The software stack has three layers:
 
 | File | Description |
 |------|-------------|
-| `images/fig1_vivado_block_design.jpg` | Complete Vivado IP Integrator block design — Zynq-7010 PL with AD9361 interface, AXI crossbar, DMA, FIR chain, SPI/IIC |
-| `images/fig2_srsepc_plmn_mismatch_bug.jpg` | srsepc first boot — PLMN mismatch bug: MME initializes with 0xf001/0xff01, triggers immediate SCTP shutdown loop |
-| `images/fig3_usbipd_attachment.jpg` | Windows PowerShell — usbipd USB/IP forwarding of ADALM-PLUTO (bus ID 2-5) to WSL2 Ubuntu |
-| `images/fig4_enb_conf_enb_section.jpg` | nano editor — enb.conf [enb] section: enb_id=0x19B, PLMN, mme_addr, n_prb=50 (pre-correction) |
-| `images/fig5_enb_conf_rf_section.jpg` | nano editor — enb.conf [rf] section: dl_earfcn, tx/rx_gain, device_name=soapy, device_args=driver=pluto |
-| `images/fig6_srsenb_soapysdr_init.jpg` | srsenb boot log — full SoapySDR init: libsrsran_rf_soapy.so, PlutoSDR enumerated, CF32 format, buffers, sensors |
-| `images/fig7_srsenb_operational_state.jpg` | srsenb log — eNodeB operational: Rx PGA 71 dB, Tx PGA 79 dB, DL=1845 MHz / UL=1750 MHz, nof_prb=25 |
-| `images/fig8_srsenb_trace_mode.jpg` | srsenb trace mode — "==== eNodeB started ===" with MAC-layer trace active, live LTE carrier confirmed |
-| `images/fig9_srsepc_plmn_901_70_corrected.jpg` | srsepc EPC log — corrected PLMN 901-70: MME decodes MCC:901 MNC:70, stable S1 Setup Response cycling |
-| `images/fig10_physical_deployment.jpg` | Physical deployment photo — ADALM-PLUTO (blue LED), USB cable, laptop split-screen EPC+eNB logs, dual SMA antennas |
+| `images/FIG1_V~1.JPG` | Complete Vivado IP Integrator block design — Zynq-7010 PL with AD9361 interface, AXI crossbar, DMA, FIR chain, SPI/IIC |
+| `images/FIG2_S~1.JPG` | srsepc first boot — PLMN mismatch bug: MME initializes with 0xf001/0xff01, triggers immediate SCTP shutdown loop |
+| `images/FIG3_U~1.JPG` | Windows PowerShell — usbipd USB/IP forwarding of ADALM-PLUTO (bus ID 2-5) to WSL2 Ubuntu |
+| `images/FIG4_E~1.JPG` | nano editor — enb.conf [enb] section: enb_id=0x19B, PLMN, mme_addr, n_prb=50 (pre-correction) |
+| `images/FIG5_E~1.JPG` | nano editor — enb.conf [rf] section: dl_earfcn, tx/rx_gain, device_name=soapy, device_args=driver=pluto |
+| `images/FIG6_S~1.JPG` | srsenb boot log — full SoapySDR init: libsrsran_rf_soapy.so, PlutoSDR enumerated, CF32 format, buffers, sensors |
+| `images/FIG7_S~1.JPG` | srsenb log — eNodeB operational: Rx PGA 71 dB, Tx PGA 79 dB, DL=1845 MHz / UL=1750 MHz, nof_prb=25 |
+| `images/FIG8_S~1.JPG` | srsenb trace mode — "==== eNodeB started ===" with MAC-layer trace active, live LTE carrier confirmed |
+| `images/FIG9_S~1.JPG` | srsepc EPC log — corrected PLMN 901-70: MME decodes MCC:901 MNC:70, stable S1 Setup Response cycling |
+| `images/FIG10_~1.JPG` | Physical deployment photo — ADALM-PLUTO (blue LED), USB cable, laptop split-screen EPC+eNB logs, dual SMA antennas |
 
 ---
 
